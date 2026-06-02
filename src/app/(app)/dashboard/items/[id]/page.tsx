@@ -72,6 +72,8 @@ export default function ItemDetailPage() {
         {[
           { icon: "description", label: "Description", value: item.description },
           { icon: "palette", label: "Color", value: item.color },
+          { icon: "devices", label: "Model", value: item.model || "—" },
+          { icon: "tag", label: "Serial no", value: item.serial_no || "—" },
           { icon: "location_on", label: "Location", value: item.location },
           { icon: "calendar_today", label: "Date", value: formatDate(item.date) },
           { icon: "person", label: "Reported by", value: `${item.reported_by_name} (${item.reported_by_role})` },

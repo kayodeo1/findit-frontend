@@ -1,20 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo, Slogan } from "@/components/layout/brand";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-mesh">
-      {/* Header */}
+      {/* Header — logo on the left */}
       <header className="flex items-center justify-between px-margin-mobile py-5 md:px-margin-desktop">
-        <div className="flex items-center gap-2">
-          <span
-            className="material-symbols-outlined text-secondary"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            find_in_page
-          </span>
-          <span className="font-headline-md text-headline-md font-bold text-on-surface">FindIt</span>
-        </div>
+        <Logo size="md" />
         <div className="flex items-center gap-3">
           <Link href="/login">
             <Button variant="outline" size="sm">Sign in</Button>
@@ -26,23 +19,35 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="flex flex-col items-center px-margin-mobile py-24 text-center md:px-margin-desktop">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-secondary-container px-4 py-2">
+      <section className="flex flex-col items-center px-margin-mobile py-16 text-center md:px-margin-desktop md:py-24">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-secondary-container px-4 py-2">
           <span className="size-2 rounded-full bg-secondary emerald-pulse" />
           <span className="font-label-sm text-label-sm text-on-secondary-container font-semibold">
-            Lost &amp; Found System
+            Reunite people with their lost belongings
           </span>
         </div>
 
-        <h1 className="mb-6 max-w-3xl font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
-          Reunite people with their lost belongings
+        {/* Big title + smaller tagline */}
+        <h1 className="mb-3 max-w-3xl font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
+          Lost &amp; Found System
         </h1>
-        <p className="mb-10 max-w-xl font-body-lg text-body-lg text-on-surface-variant">
-          Report lost items, submit found items, and track claims — all in one streamlined platform
-          with admin oversight.
+        <p className="mb-8 max-w-xl font-body-md text-body-md text-on-surface-variant">
+          …connect with your lost items
         </p>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        {/* Central search visual */}
+        <div className="relative mb-8 flex size-40 items-center justify-center md:size-48">
+          <span className="absolute inset-0 rounded-full bg-secondary-container/40 emerald-pulse" />
+          <span className="absolute inset-4 rounded-full bg-secondary-container/60" />
+          <span
+            className="material-symbols-outlined relative text-[80px] text-secondary md:text-[96px]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            travel_explore
+          </span>
+        </div>
+
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
           <Link href="/signup">
             <Button size="lg">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
@@ -53,13 +58,15 @@ export default function HomePage() {
             <Button variant="outline" size="lg">Sign in</Button>
           </Link>
         </div>
+
+        <Slogan />
       </section>
 
-      {/* How it works */}
+      {/* Features (small font) */}
       <section className="px-margin-mobile pb-24 md:px-margin-desktop">
         <div className="mx-auto max-w-container-max">
-          <h2 className="mb-12 text-center font-headline-lg text-headline-lg font-semibold text-on-surface">
-            How it works
+          <h2 className="mb-10 text-center font-label-md text-label-md font-semibold uppercase tracking-widest text-on-surface-variant">
+            Features
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
             {[
@@ -151,9 +158,10 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="px-margin-mobile py-8 text-center md:px-margin-desktop">
+      <footer className="flex flex-col items-center gap-2 px-margin-mobile py-8 text-center md:px-margin-desktop">
+        <Slogan />
         <p className="font-label-sm text-label-sm text-on-surface-variant">
-          FindIt Lost &amp; Found System &copy; 2025
+          L&amp;F — Lost &amp; Found System &copy; 2025
         </p>
       </footer>
     </main>

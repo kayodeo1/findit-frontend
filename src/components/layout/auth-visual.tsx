@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Logo } from "./brand";
 
 export function AuthVisual({ quote, author }: { quote: string; author: string }) {
   return (
@@ -12,18 +12,7 @@ export function AuthVisual({ quote, author }: { quote: string; author: string })
         }}
       />
       <div className="relative z-10">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-headline-md text-headline-md font-bold tracking-tight text-white"
-        >
-          <span
-            className="material-symbols-outlined text-secondary-fixed"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            find_in_page
-          </span>
-          FindIt
-        </Link>
+        <Logo href="/" size="md" tone="light" withTagline />
       </div>
 
       <div className="glass-card relative z-10 mb-4 max-w-lg rounded-lg p-10">

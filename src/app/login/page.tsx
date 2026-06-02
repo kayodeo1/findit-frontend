@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useAuth, TOKEN_KEY } from "@/lib/auth-context";
 import { AuthVisual } from "@/components/layout/auth-visual";
+import { Slogan } from "@/components/layout/brand";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 
@@ -26,7 +27,7 @@ export default function LoginPage() {
     try {
       const { token, user } = await api.auth.login({ email, password });
       setAuth(token, user);
-      toast.success("Welcome back");
+      toast.success(`Hi, ${user.first_name || "there"} 👋`);
       router.replace("/dashboard");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");
@@ -37,18 +38,31 @@ export default function LoginPage() {
   return (
     <main className="flex h-screen w-full overflow-hidden bg-background">
       <AuthVisual
-        quote="Every lost item has an owner waiting — let's bring them together."
-        author="FindIt System"
+        quote="Whether you lost it or found it — connect here."
+        author="L&F"
       />
 
       <section className="relative flex w-full items-center justify-center px-margin-mobile md:w-1/2 md:px-margin-desktop">
         <div className="flex w-full max-w-[440px] flex-col">
-          <div className="mb-10">
+          <div className="mb-8">
             <h1 className="mb-2 font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
               Welcome back
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant">
               Sign in to report or track lost and found items.
+            </p>
+          </div>
+
+          {/* New users must verify by email first */}
+          <div className="mb-6 flex items-start gap-3 rounded-xl bg-secondary-container/30 px-4 py-3">
+            <span
+              className="material-symbols-outlined text-[20px] text-secondary"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              mark_email_read
+            </span>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              Just created an account? Check your mail and verify it before signing in.
             </p>
           </div>
 
@@ -85,6 +99,14 @@ export default function LoginPage() {
                   </span>
                 </button>
               </div>
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="font-label-sm text-label-sm font-semibold text-secondary hover:underline underline-offset-4"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </Field>
 
             <Button type="submit" size="lg" className="w-full" disabled={loading}>
@@ -93,12 +115,15 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-10 text-center font-body-md text-body-md text-on-surface-variant">
+          <p className="mt-8 text-center font-body-md text-body-md text-on-surface-variant">
             New here?{" "}
             <Link href="/signup" className="font-bold text-secondary hover:underline underline-offset-4">
               Create an account
             </Link>
           </p>
+          <div className="mt-4 text-center">
+            <Slogan />
+          </div>
         </div>
       </section>
     </main>

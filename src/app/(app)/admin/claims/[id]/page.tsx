@@ -22,6 +22,8 @@ export default function ClaimReviewPage() {
   const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [query, setQuery] = useState("");
+  const [querying, setQuerying] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -61,6 +63,24 @@ export default function ClaimReviewPage() {
       toast.error(err instanceof Error ? err.message : "Failed to process claim");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleQuery() {
+    if (!query.trim()) {
+      toast.error("Please type a query first");
+      return;
+    }
+    setQuerying(true);
+    try {
+      const updated = await api.claims.query(Number(id), { admin_query: query.trim() });
+      setClaim(updated);
+      setQuery("");
+      toast.success("Query sent to the claimant");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send query");
+    } finally {
+      setQuerying(false);
     }
   }
 
@@ -125,6 +145,35 @@ export default function ClaimReviewPage() {
           <ClaimStatusBadge status={claim.status} />
         </div>
       </div>
+
+      {/* Issue a query to the claimant while reviewing */}
+      {claim.status === "pending" && (
+        <div className="rounded-lg bg-surface-container-lowest p-6 ring-1 ring-outline-variant/40 shadow-sm">
+          <h2 className="font-headline-md text-headline-md font-semibold text-on-surface mb-2">
+            Raise a query
+          </h2>
+          <p className="mb-4 font-body-md text-body-md text-on-surface-variant">
+            Ask the claimant for more detail before deciding. This doesn&apos;t resolve the claim.
+          </p>
+          {claim.admin_query && (
+            <div className="mb-4 rounded-xl bg-amber-50 p-4">
+              <p className="font-label-sm text-label-sm font-semibold text-amber-800">Current query</p>
+              <p className="mt-1 font-body-md text-body-md text-on-surface">{claim.admin_query}</p>
+            </div>
+          )}
+          <Field label="Query">
+            <Textarea
+              placeholder="e.g. Can you describe a unique scratch or the lock-screen wallpaper?"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </Field>
+          <Button onClick={handleQuery} disabled={querying} variant="subtle" className="mt-3">
+            <span className="material-symbols-outlined text-base">contact_support</span>
+            {querying ? "Sending…" : "Send query"}
+          </Button>
+        </div>
+      )}
 
       {/* Review action */}
       {claim.status === "pending" && (

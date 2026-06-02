@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { Logo } from "./brand";
 
 interface NavItem {
   href: string;
@@ -18,8 +19,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/found", icon: "search", label: "Browse Found", roles: ["owner"] },
   { href: "/dashboard/found/new", icon: "add_location_alt", label: "Report Found", roles: ["finder"] },
   { href: "/dashboard/claims", icon: "assignment", label: "My Claims", roles: ["owner"] },
-  { href: "/admin", icon: "admin_panel_settings", label: "Admin Panel", roles: ["admin"] },
+  { href: "/admin/users", icon: "group", label: "Users", roles: ["admin"] },
   { href: "/admin/claims", icon: "fact_check", label: "Review Claims", roles: ["admin"] },
+  { href: "/admin", icon: "admin_panel_settings", label: "All Items", roles: ["admin"] },
   { href: "/dashboard/profile", icon: "manage_accounts", label: "Profile" },
 ];
 
@@ -33,14 +35,8 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-screen w-64 flex-col bg-surface-container-low border-r border-outline-variant/40">
-      <div className="flex items-center gap-2 px-6 py-5 border-b border-outline-variant/40">
-        <span
-          className="material-symbols-outlined text-secondary"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          find_in_page
-        </span>
-        <span className="font-headline-md text-headline-md font-bold text-on-surface">FindIt</span>
+      <div className="px-6 py-5 border-b border-outline-variant/40">
+        <Logo size="sm" withTagline />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">

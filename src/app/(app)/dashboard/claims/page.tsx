@@ -104,6 +104,22 @@ export default function MyClaimsPage() {
                 </div>
               )}
 
+              {claim.admin_query && claim.status === "pending" && (
+                <div className="mb-3 rounded-xl bg-amber-50 p-3">
+                  <div className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-amber-600 text-base mt-0.5">
+                      contact_support
+                    </span>
+                    <div>
+                      <p className="font-label-sm text-label-sm font-semibold text-amber-800 mb-0.5">
+                        The admin has a question for you
+                      </p>
+                      <p className="font-body-md text-body-md text-on-surface">{claim.admin_query}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {claim.status === "pending" && (
                 <div className="rounded-xl bg-amber-50 p-3">
                   <div className="flex items-center gap-2">

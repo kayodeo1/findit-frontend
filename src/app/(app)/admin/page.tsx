@@ -7,25 +7,19 @@ import { api } from "@/lib/api";
 import type { Item } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { ItemStatusBadge } from "@/components/ui/badge";
-import { Input, Select } from "@/components/ui/input";
+import { Select } from "@/components/ui/input";
 import { PageLoader, EmptyState } from "@/components/ui/spinner";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default function AdminItemsPage() {
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  async function load(q?: string, status?: string) {
+  async function load(status?: string) {
     setLoading(true);
     try {
-      const res = await api.items.listAll({
-        search: q || undefined,
-        status: status || undefined,
-      });
+      const res = await api.items.listAll({ status: status || undefined });
       setItems(res.results);
     } catch {
       toast.error("Failed to load items");
@@ -35,11 +29,6 @@ export default function AdminItemsPage() {
   }
 
   useEffect(() => { load(); }, []);
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    load(search, statusFilter);
-  }
 
   const lostCount = items.filter((i) => i.status === "lost").length;
   const foundCount = items.filter((i) => i.status === "found").length;
@@ -52,7 +41,8 @@ export default function AdminItemsPage() {
           All items
         </h1>
         <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-          Overview of all lost, found, and claimed items in the system.
+          A transparent, read-only overview of every lost, found, and claimed item. To find a
+          person, use the Users page — admins search users, not items.
         </p>
       </div>
 
@@ -77,29 +67,19 @@ export default function AdminItemsPage() {
         ))}
       </div>
 
-      {/* Filters */}
-      <form onSubmit={handleSearch} className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-outline" />
-          <Input
-            placeholder="Search items…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-11"
-          />
-        </div>
+      {/* Status filter only — no item search for admins */}
+      <div className="flex flex-wrap items-center gap-3">
         <Select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); load(search, e.target.value); }}
-          className="w-36"
+          onChange={(e) => { setStatusFilter(e.target.value); load(e.target.value); }}
+          className="w-40"
         >
           <option value="">All statuses</option>
           <option value="lost">Lost</option>
           <option value="found">Found</option>
           <option value="claimed">Claimed</option>
         </Select>
-        <Button type="submit" variant="outline">Search</Button>
-      </form>
+      </div>
 
       {loading ? (
         <PageLoader />

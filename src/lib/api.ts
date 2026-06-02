@@ -1,4 +1,19 @@
-import type { Claim, Item, Paginated, StatusHistory, UserProfile } from "./types";
+import type { AdminUser, Claim, Item, Paginated, StatusHistory, UserProfile } from "./types";
+
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  role: string;
+  first_name: string;
+  middle_name?: string;
+  last_name?: string;
+  phone?: string;
+  house_no?: string;
+  street?: string;
+  area?: string;
+  lga?: string;
+  city?: string;
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 const TOKEN_KEY = "findit_token";
@@ -60,12 +75,7 @@ export const api = {
   auth: {
     login: (body: { email: string; password: string }): Promise<{ token: string; user: UserProfile }> =>
       apiFetch("/users/login/", { method: "POST", body: JSON.stringify(body) }, true),
-    register: (body: {
-      email: string;
-      password: string;
-      full_name: string;
-      role: string;
-    }): Promise<{ token: string; user: UserProfile }> =>
+    register: (body: RegisterPayload): Promise<{ token: string; user: UserProfile }> =>
       apiFetch("/users/register/", { method: "POST", body: JSON.stringify(body) }, true),
   },
 
@@ -73,10 +83,13 @@ export const api = {
     me: (): Promise<UserProfile> => apiFetch("/users/me/"),
     updateMe: (body: Partial<UserProfile>): Promise<UserProfile> =>
       apiFetch("/users/me/", { method: "PATCH", body: JSON.stringify(body) }),
-    list: (params?: Record<string, string>): Promise<Paginated<UserProfile>> =>
+    list: (params?: Record<string, string | undefined>): Promise<Paginated<AdminUser>> =>
       apiFetch(`/users/${qs(params)}`),
-    update: (id: number, body: Partial<UserProfile>): Promise<UserProfile> =>
+    get: (id: number): Promise<AdminUser> => apiFetch(`/users/${id}/`),
+    update: (id: number, body: Partial<AdminUser>): Promise<AdminUser> =>
       apiFetch(`/users/${id}/`, { method: "PATCH", body: JSON.stringify(body) }),
+    remove: (id: number): Promise<void> =>
+      apiFetch(`/users/${id}/`, { method: "DELETE" }),
   },
 
   items: {
@@ -111,6 +124,8 @@ export const api = {
       },
     ): Promise<Claim> =>
       apiFetch(`/claims/${id}/review/`, { method: "POST", body: JSON.stringify(body) }),
+    query: (id: number, body: { admin_query: string }): Promise<Claim> =>
+      apiFetch(`/claims/${id}/query/`, { method: "POST", body: JSON.stringify(body) }),
     history: (id: number): Promise<Paginated<StatusHistory>> =>
       apiFetch(`/claims/${id}/history/`),
   },

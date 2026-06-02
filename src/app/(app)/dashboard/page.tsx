@@ -82,10 +82,12 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="font-headline-lg text-headline-lg font-semibold text-on-surface">
-          {role === "admin" ? "Admin Dashboard" : `Welcome back, ${profile?.first_name || "there"}`}
+          {role === "admin" ? "Admin Dashboard" : `Hi, ${profile?.first_name || "there"} 👋`}
         </h1>
-        <p className="mt-1 font-body-md text-body-md text-on-surface-variant capitalize">
-          {role} · Lost &amp; Found System
+        <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
+          {role === "owner" && "Lost something? Report it or browse found items below."}
+          {role === "finder" && "Found something? Submit it so the owner can claim it."}
+          {role === "admin" && "Lost & Found System"}
         </p>
       </div>
 

@@ -1,143 +1,235 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
 import { AuthVisual } from "@/components/layout/auth-visual";
+import { Slogan } from "@/components/layout/brand";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 type AccountType = "owner" | "finder";
+type Stage = "form" | "submitting" | "done";
 
-const TYPES: { value: AccountType; label: string; icon: string; blurb: string }[] = [
-  { value: "owner", label: "Owner", icon: "person_search", blurb: "Report lost & claim found" },
-  { value: "finder", label: "Finder", icon: "location_on", blurb: "Submit items you found" },
+// Smaller text boxes than the default field styling.
+const SM = "py-2.5 rounded-xl";
+
+const ROLES: { value: AccountType; label: string; icon: string; blurb: string }[] = [
+  { value: "owner", label: "Owner", icon: "person_search", blurb: "I want to report & claim lost items" },
+  { value: "finder", label: "Finder", icon: "location_on", blurb: "I want to submit items I found" },
 ];
 
+const EMPTY = {
+  first_name: "",
+  middle_name: "",
+  last_name: "",
+  house_no: "",
+  street: "",
+  area: "",
+  lga: "",
+  city: "",
+  phone: "",
+  email: "",
+  password: "",
+};
+
 export default function SignupPage() {
-  const router = useRouter();
-  const { setAuth } = useAuth();
-  const [accountType, setAccountType] = useState<AccountType>("owner");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<AccountType>("owner");
+  const [form, setForm] = useState({ ...EMPTY });
+  const [stage, setStage] = useState<Stage>("form");
+
+  function set(field: keyof typeof EMPTY, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
+    setStage("submitting");
     try {
-      const { token, user } = await api.auth.register({
-        email,
-        password,
-        full_name: fullName,
-        role: accountType,
-      });
-      setAuth(token, user);
-      toast.success("Account created");
-      router.replace("/dashboard");
+      await api.auth.register({ role, ...form });
+      // Simulate the "just a moment" wait, then ask the user to verify by email.
+      // We deliberately do NOT log the user in — they must verify first.
+      await new Promise((r) => setTimeout(r, 1400));
+      setStage("done");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed");
-      setLoading(false);
+      setStage("form");
     }
   }
 
   return (
     <main className="flex min-h-screen w-full overflow-hidden bg-background">
       <AuthVisual
-        quote="Whether you lost it or found it — FindIt connects the dots."
-        author="FindIt"
+        quote="Whether you lost it or found it — connect here."
+        author="L&F"
       />
 
       <section className="relative flex w-full items-center justify-center px-margin-mobile py-10 md:w-1/2 md:px-margin-desktop">
-        <div className="flex w-full max-w-[440px] flex-col">
-          <div className="mb-8">
-            <h1 className="mb-2 font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
-              Create account
-            </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              How will you be using FindIt?
-            </p>
-          </div>
-
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-3">
-              {TYPES.map((t) => {
-                const active = accountType === t.value;
-                return (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setAccountType(t.value)}
-                    className={cn(
-                      "flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all cursor-pointer",
-                      active
-                        ? "border-secondary bg-secondary-container/50 text-on-secondary-container"
-                        : "border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-low",
-                    )}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
-                    >
-                      {t.icon}
-                    </span>
-                    <div>
-                      <p className="font-label-md text-label-md font-semibold">{t.label}</p>
-                      <p className="font-label-sm text-label-sm opacity-70">{t.blurb}</p>
-                    </div>
-                  </button>
-                );
-              })}
+        {stage === "submitting" ? (
+          <WaitingScreen />
+        ) : stage === "done" ? (
+          <VerifyEmailScreen email={form.email} />
+        ) : (
+          <div className="flex w-full max-w-[460px] flex-col">
+            <div className="mb-6">
+              <h1 className="mb-1 font-display-lg-mobile text-display-lg-mobile text-on-surface">
+                Create account
+              </h1>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Fill in the form below to get started.
+              </p>
             </div>
 
-            <Field label="Full name">
-              <Input
-                placeholder="Your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </Field>
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              {/* Role — compact, not the focus of the page */}
+              <div>
+                <p className="mb-2 ml-1 font-label-md text-label-md text-on-surface">I am a…</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {ROLES.map((r) => {
+                    const active = role === r.value;
+                    return (
+                      <button
+                        key={r.value}
+                        type="button"
+                        onClick={() => setRole(r.value)}
+                        className={cn(
+                          "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer",
+                          active
+                            ? "border-secondary bg-secondary-container/50 text-on-secondary-container"
+                            : "border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-low",
+                        )}
+                      >
+                        <span
+                          className="material-symbols-outlined text-[20px]"
+                          style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          {r.icon}
+                        </span>
+                        <span className="font-label-md text-label-md font-semibold">{r.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-            <Field label="Email address">
-              <Input
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </Field>
+              {/* Name */}
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field label="First name">
+                  <Input className={SM} value={form.first_name} onChange={(e) => set("first_name", e.target.value)} placeholder="First" required />
+                </Field>
+                <Field label="Middle name">
+                  <Input className={SM} value={form.middle_name} onChange={(e) => set("middle_name", e.target.value)} placeholder="Middle" />
+                </Field>
+                <Field label="Last name">
+                  <Input className={SM} value={form.last_name} onChange={(e) => set("last_name", e.target.value)} placeholder="Last" required />
+                </Field>
+              </div>
 
-            <Field label="Password">
-              <Input
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-            </Field>
+              {/* Address */}
+              <div>
+                <p className="mb-2 ml-1 font-label-md text-label-md text-on-surface">Address</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label="House no">
+                    <Input className={SM} value={form.house_no} onChange={(e) => set("house_no", e.target.value)} placeholder="e.g. 12" />
+                  </Field>
+                  <Field label="Street">
+                    <Input className={SM} value={form.street} onChange={(e) => set("street", e.target.value)} placeholder="Street name" />
+                  </Field>
+                  <Field label="Area">
+                    <Input className={SM} value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Area / district" />
+                  </Field>
+                  <Field label="LG">
+                    <Input className={SM} value={form.lga} onChange={(e) => set("lga", e.target.value)} placeholder="Local government" />
+                  </Field>
+                  <Field label="City" className="sm:col-span-2">
+                    <Input className={SM} value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="City" />
+                  </Field>
+                </div>
+              </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Creating account…" : "Create account"}
-            </Button>
-          </form>
+              {/* Contact */}
+              <Field label="Mobile no">
+                <Input className={SM} type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+234 800 000 0000" />
+              </Field>
 
-          <p className="mt-8 text-center font-body-md text-body-md text-on-surface-variant">
-            Already have an account?{" "}
-            <Link href="/login" className="font-bold text-secondary hover:underline underline-offset-4">
-              Sign in
-            </Link>
-          </p>
-        </div>
+              <Field label="Email">
+                <Input className={SM} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="name@example.com" required />
+              </Field>
+
+              <Field label="Password">
+                <Input className={SM} type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="At least 6 characters" minLength={6} required />
+              </Field>
+
+              {/* Submit — modest size, not full-bleed-huge */}
+              <div className="pt-1">
+                <Button type="submit" size="sm" className="px-8">
+                  Submit
+                  <span className="material-symbols-outlined text-base">arrow_forward</span>
+                </Button>
+              </div>
+            </form>
+
+            <p className="mt-6 text-center font-body-md text-body-md text-on-surface-variant">
+              Already have an account?{" "}
+              <Link href="/login" className="font-bold text-secondary hover:underline underline-offset-4">
+                Sign in
+              </Link>
+            </p>
+            <div className="mt-4 text-center">
+              <Slogan />
+            </div>
+          </div>
+        )}
       </section>
     </main>
+  );
+}
+
+function WaitingScreen() {
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <div className="relative flex size-24 items-center justify-center">
+        <span className="absolute inset-0 rounded-full bg-secondary-container/40 emerald-pulse" />
+        <Spinner className="size-10" />
+      </div>
+      <h2 className="font-headline-lg text-headline-lg font-semibold text-on-surface">
+        Just a moment…
+      </h2>
+      <p className="max-w-xs font-body-md text-body-md text-on-surface-variant">
+        Setting up your account and getting things ready for you.
+      </p>
+    </div>
+  );
+}
+
+function VerifyEmailScreen({ email }: { email: string }) {
+  return (
+    <div className="flex max-w-sm flex-col items-center gap-4 text-center">
+      <div className="flex size-16 items-center justify-center rounded-full bg-secondary-container/60">
+        <span
+          className="material-symbols-outlined text-3xl text-secondary"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          mark_email_unread
+        </span>
+      </div>
+      <h2 className="font-headline-lg text-headline-lg font-semibold text-on-surface">
+        Check your mail
+      </h2>
+      <p className="font-body-md text-body-md text-on-surface-variant">
+        We&apos;ve sent a verification link to{" "}
+        <span className="font-semibold text-on-surface">{email || "your email"}</span>. Please
+        confirm your email before signing in.
+      </p>
+      <Link href="/login" className="w-full">
+        <Button size="lg" className="w-full">
+          Go to sign in
+        </Button>
+      </Link>
+      <Slogan className="mt-2" />
+    </div>
   );
 }

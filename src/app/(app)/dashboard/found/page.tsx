@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { Item } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
-import { ItemStatusBadge } from "@/components/ui/badge";
+import { Badge, ItemStatusBadge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PageLoader, EmptyState } from "@/components/ui/spinner";
@@ -15,6 +15,7 @@ import { Search } from "lucide-react";
 
 export default function BrowseFoundPage() {
   const [items, setItems] = useState<Item[]>([]);
+  const [claimedIds, setClaimedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [claimItem, setClaimItem] = useState<Item | null>(null);
@@ -22,8 +23,13 @@ export default function BrowseFoundPage() {
   async function load(q?: string) {
     setLoading(true);
     try {
-      const res = await api.items.list({ status: "found", search: q });
-      setItems(res.results);
+      const [itemsRes, claimsRes] = await Promise.all([
+        api.items.list({ status: "found", search: q }),
+        api.claims.list(),
+      ]);
+      setItems(itemsRes.results);
+      // Track which items the current user has already claimed.
+      setClaimedIds(new Set(claimsRes.results.map((c) => c.item)));
     } catch {
       toast.error("Failed to load items");
     } finally {
@@ -72,7 +78,9 @@ export default function BrowseFoundPage() {
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {items.map((item) => {
+            const claimed = claimedIds.has(item.id);
+            return (
             <div
               key={item.id}
               className="flex flex-col rounded-lg bg-surface-container-lowest ring-1 ring-outline-variant/40 shadow-sm hover:ring-secondary/40 transition-all overflow-hidden"
@@ -89,7 +97,14 @@ export default function BrowseFoundPage() {
                   <h3 className="font-headline-md text-headline-md font-semibold text-on-surface line-clamp-1">
                     {item.name}
                   </h3>
-                  <ItemStatusBadge status={item.status} />
+                  {claimed ? (
+                    <Badge tone="emerald">
+                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      Claimed by you
+                    </Badge>
+                  ) : (
+                    <ItemStatusBadge status={item.status} />
+                  )}
                 </div>
 
                 <p className="mb-4 font-body-md text-body-md text-on-surface-variant line-clamp-2 flex-1">
@@ -115,12 +130,14 @@ export default function BrowseFoundPage() {
                   <Button
                     size="sm"
                     className="flex-1"
+                    variant={claimed ? "outline" : "default"}
+                    disabled={claimed}
                     onClick={() => setClaimItem(item)}
                   >
                     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      verified
+                      {claimed ? "check" : "verified"}
                     </span>
-                    Claim
+                    {claimed ? "Claimed" : "Claim"}
                   </Button>
                   <Link href={`/dashboard/items/${item.id}`}>
                     <Button size="sm" variant="outline">
@@ -130,7 +147,8 @@ export default function BrowseFoundPage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
