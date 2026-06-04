@@ -73,7 +73,7 @@ function qs(params?: Record<string, string | number | undefined>): string {
 
 export const api = {
   auth: {
-    login: (body: { email: string; password: string }): Promise<{ token: string; user: UserProfile }> =>
+    login: (body: { email: string; password: string; role?: string }): Promise<{ token: string; user: UserProfile }> =>
       apiFetch("/users/login/", { method: "POST", body: JSON.stringify(body) }, true),
     register: (body: RegisterPayload): Promise<{ token: string; user: UserProfile }> =>
       apiFetch("/users/register/", { method: "POST", body: JSON.stringify(body) }, true),

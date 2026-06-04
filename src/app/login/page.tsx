@@ -10,10 +10,19 @@ import { AuthVisual } from "@/components/layout/auth-visual";
 import { Slogan } from "@/components/layout/brand";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+type AccountType = "owner" | "finder";
+
+const ROLES: { value: AccountType; label: string; icon: string }[] = [
+  { value: "owner", label: "Owner", icon: "person_search" },
+  { value: "finder", label: "Finder", icon: "location_on" },
+];
 
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuth();
+  const [role, setRole] = useState<AccountType>("owner");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +34,7 @@ export default function LoginPage() {
     // Clear any stale token so it isn't sent as a Bearer header on the login request
     localStorage.removeItem(TOKEN_KEY);
     try {
-      const { token, user } = await api.auth.login({ email, password });
+      const { token, user } = await api.auth.login({ email, password, role });
       setAuth(token, user);
       toast.success(`Hi, ${user.first_name || "there"} 👋`);
       router.replace("/dashboard");
@@ -45,9 +54,6 @@ export default function LoginPage() {
       <section className="relative flex w-full items-center justify-center px-margin-mobile md:w-1/2 md:px-margin-desktop">
         <div className="flex w-full max-w-[440px] flex-col">
           <div className="mb-8">
-            <h1 className="mb-2 font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
-              Welcome back
-            </h1>
             <p className="font-body-md text-body-md text-on-surface-variant">
               Sign in to report or track lost and found items.
             </p>
@@ -67,6 +73,37 @@ export default function LoginPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Sign in as — owner or finder */}
+            <div>
+              <p className="mb-2 ml-1 font-label-md text-label-md text-on-surface">Sign in as…</p>
+              <div className="grid grid-cols-2 gap-2">
+                {ROLES.map((r) => {
+                  const active = role === r.value;
+                  return (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => setRole(r.value)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer",
+                        active
+                          ? "border-secondary bg-secondary-container/50 text-on-secondary-container"
+                          : "border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-low",
+                      )}
+                    >
+                      <span
+                        className="material-symbols-outlined text-[20px]"
+                        style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                      >
+                        {r.icon}
+                      </span>
+                      <span className="font-label-md text-label-md font-semibold">{r.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <Field label="Email address">
               <Input
                 type="email"

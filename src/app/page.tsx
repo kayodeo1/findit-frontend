@@ -7,7 +7,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-mesh">
       {/* Header — logo on the left */}
       <header className="flex items-center justify-between px-margin-mobile py-5 md:px-margin-desktop">
-        <Logo size="md" />
+        <Logo size="md" withTagline />
         <div className="flex items-center gap-3">
           <Link href="/login">
             <Button variant="outline" size="sm">Sign in</Button>
@@ -20,19 +20,12 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center px-margin-mobile py-16 text-center md:px-margin-desktop md:py-24">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-secondary-container px-4 py-2">
-          <span className="size-2 rounded-full bg-secondary emerald-pulse" />
-          <span className="font-label-sm text-label-sm text-on-secondary-container font-semibold">
-            Reunite people with their lost belongings
-          </span>
-        </div>
-
         {/* Big title + smaller tagline */}
         <h1 className="mb-3 max-w-3xl font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
           Lost &amp; Found System
         </h1>
         <p className="mb-8 max-w-xl font-body-md text-body-md text-on-surface-variant">
-          …connect with your lost items
+          Reunite people with lost belongings
         </p>
 
         {/* Central search visual */}

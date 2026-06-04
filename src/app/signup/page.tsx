@@ -9,18 +9,12 @@ import { Slogan } from "@/components/layout/brand";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { cn } from "@/lib/utils";
+import { CITIES } from "@/lib/options";
 
-type AccountType = "owner" | "finder";
 type Stage = "form" | "submitting" | "done";
 
 // Smaller text boxes than the default field styling.
 const SM = "py-2.5 rounded-xl";
-
-const ROLES: { value: AccountType; label: string; icon: string; blurb: string }[] = [
-  { value: "owner", label: "Owner", icon: "person_search", blurb: "I want to report & claim lost items" },
-  { value: "finder", label: "Finder", icon: "location_on", blurb: "I want to submit items I found" },
-];
 
 const EMPTY = {
   first_name: "",
@@ -37,7 +31,6 @@ const EMPTY = {
 };
 
 export default function SignupPage() {
-  const [role, setRole] = useState<AccountType>("owner");
   const [form, setForm] = useState({ ...EMPTY });
   const [stage, setStage] = useState<Stage>("form");
 
@@ -49,7 +42,8 @@ export default function SignupPage() {
     e.preventDefault();
     setStage("submitting");
     try {
-      await api.auth.register({ role, ...form });
+      // Role is chosen at sign-in, not here — register with the default ("owner").
+      await api.auth.register({ role: "owner", ...form });
       // Simulate the "just a moment" wait, then ask the user to verify by email.
       // We deliberately do NOT log the user in — they must verify first.
       await new Promise((r) => setTimeout(r, 1400));
@@ -84,37 +78,6 @@ export default function SignupPage() {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Role — compact, not the focus of the page */}
-              <div>
-                <p className="mb-2 ml-1 font-label-md text-label-md text-on-surface">I am a…</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {ROLES.map((r) => {
-                    const active = role === r.value;
-                    return (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() => setRole(r.value)}
-                        className={cn(
-                          "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer",
-                          active
-                            ? "border-secondary bg-secondary-container/50 text-on-secondary-container"
-                            : "border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-low",
-                        )}
-                      >
-                        <span
-                          className="material-symbols-outlined text-[20px]"
-                          style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
-                        >
-                          {r.icon}
-                        </span>
-                        <span className="font-label-md text-label-md font-semibold">{r.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Name */}
               <div className="grid gap-3 sm:grid-cols-3">
                 <Field label="First name">
@@ -145,7 +108,19 @@ export default function SignupPage() {
                     <Input className={SM} value={form.lga} onChange={(e) => set("lga", e.target.value)} placeholder="Local government" />
                   </Field>
                   <Field label="City" className="sm:col-span-2">
-                    <Input className={SM} value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="City" />
+                    <Input
+                      className={SM}
+                      list="city-suggestions"
+                      value={form.city}
+                      onChange={(e) => set("city", e.target.value)}
+                      placeholder="Start typing… e.g. Ib → Ibadan"
+                      autoComplete="off"
+                    />
+                    <datalist id="city-suggestions">
+                      {CITIES.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </Field>
                 </div>
               </div>
