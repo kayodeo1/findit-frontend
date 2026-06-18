@@ -12,7 +12,7 @@ export function AuthVisual({ quote, author }: { quote: string; author: string })
         }}
       />
       <div className="relative z-10">
-        <Logo href="/" size="md" tone="light" withTagline />
+        <Logo href="/" size="lg" tone="light" withTagline />
       </div>
 
       <div className="glass-card relative z-10 mb-4 max-w-lg rounded-lg p-10">

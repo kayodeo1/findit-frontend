@@ -22,14 +22,14 @@ export function Logo({
   className?: string;
 }) {
   const icon = {
-    sm: "text-[22px]",
-    md: "text-[28px]",
-    lg: "text-[40px]",
+    sm: "text-[30px]",
+    md: "text-[40px]",
+    lg: "text-[52px]",
   }[size];
   const word = {
-    sm: "text-headline-md",
-    md: "text-headline-lg",
-    lg: "text-display-lg-mobile",
+    sm: "text-headline-lg",
+    md: "text-display-lg-mobile",
+    lg: "text-display-lg",
   }[size];
 
   const wordColor = tone === "light" ? "text-white" : "text-on-surface";

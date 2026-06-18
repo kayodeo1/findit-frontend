@@ -36,7 +36,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col bg-surface-container-low border-r border-outline-variant/40">
       <div className="px-6 py-5 border-b border-outline-variant/40">
-        <Logo size="sm" withTagline />
+        <Logo size="md" withTagline />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">

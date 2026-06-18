@@ -7,13 +7,13 @@ export default function HomePage() {
     <main className="min-h-screen bg-mesh">
       {/* Header — logo on the left */}
       <header className="flex items-center justify-between px-margin-mobile py-5 md:px-margin-desktop">
-        <Logo size="md" withTagline />
+        <Logo size="lg" withTagline />
         <div className="flex items-center gap-3">
           <Link href="/login">
-            <Button variant="outline" size="sm">Sign in</Button>
+            <Button variant="outline" size="sm" className="bg-white text-on-surface">Sign in</Button>
           </Link>
           <Link href="/signup">
-            <Button size="sm">Get started</Button>
+            <Button size="sm">Create account</Button>
           </Link>
         </div>
       </header>
@@ -25,7 +25,7 @@ export default function HomePage() {
           Lost &amp; Found System
         </h1>
         <p className="mb-8 max-w-xl font-body-md text-body-md text-on-surface-variant">
-          Reunite people with lost belongings
+          Reunites people with their lost belongings
         </p>
 
         {/* Central search visual */}
@@ -48,7 +48,7 @@ export default function HomePage() {
             </Button>
           </Link>
           <Link href="/login">
-            <Button variant="outline" size="lg">Sign in</Button>
+            <Button variant="outline" size="lg" className="bg-white text-on-surface">Sign in</Button>
           </Link>
         </div>
 
